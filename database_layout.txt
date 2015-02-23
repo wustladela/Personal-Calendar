@@ -1,0 +1,10 @@
+database:  module6
+
+table: users
+columns: user_id (int unsigned, auto_increment, not null), username (varchar(20) not null ),password (char(34), not null)
+primary key: user_id
+Note:  Let's use the same password salt as we did in module3, '$1$awagawag$'.  This results in passwords exactly 34 characters long.
+
+table: events
+columns: event_id (int unsigned, auto_increment, not null), event_descrip (varchar(150), event_name(varchar(30),not null),
+    event_month (varchar(20) not null), event_day (tinyint unsigned not null), event_year smallint unsigned not null), event_hour tinyint unsigned, not null, event_min tinyint unsigned, not null

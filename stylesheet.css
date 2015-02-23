@@ -1,0 +1,87 @@
+body{
+  
+}
+.form{
+    text-align: center;
+    
+}
+h1{
+    text-align: center;
+
+    font-size:  40px;
+    font-family: "Brush Script MT", cursive;
+}
+h2{
+    text-align: center;
+    
+}
+h3{
+    text-align: center;
+    
+}/*body{
+    background-color:black;
+    background-image:
+    radial-gradient(white, rgba(255,255,255,.2) 2px, transparent 40px),
+    radial-gradient(white, rgba(255,255,255,.15) 1px, transparent 30px),
+    radial-gradient(white, rgba(255,255,255,.1) 2px, transparent 40px),
+    radial-gradient(rgba(255,255,255,.4), rgba(255,255,255,.1) 2px, transparent 30px);
+    background-size: 550px 550px, 350px 350px, 250px 250px, 150px 150px; 
+    background-position: 0 0, 40px 60px, 130px 270px, 70px 100px;
+}
+*/
+.form{
+    text-align: center;
+    
+}
+th {
+    height: 50px;
+    width: 50px;
+}
+tr {
+    height: 50px;
+    width: 50px;   
+}
+
+
+.calendar {font-size:20px;color:#555555;width:100%;border-width: 1px;border-color: #729ea5;border-collapse: collapse;}
+.calendar th {font-size:20px;background-color:#D0FAEE;border-width: 1px;padding: 8px;border-style: solid;border-color: #729ea5;text-align:center;}
+.calendar tr {background-color:#D0FAEE;}
+.calendar td {font-size:20px;border-width: 1px;padding: 8px;border-style: solid;border-color: #729ea5;}
+.calendar td:hover {background-color:#D66F62;}
+
+
+h1{
+    text-align: center;
+    
+    font-size:  40px;
+    font-family: "Brush Script MT", cursive;
+}
+h2{
+    text-align: center;
+    
+}
+h3{
+    text-align: center;
+    
+}
+#window_day{
+    width: 50px;
+}
+#window_hour{
+    width: 50px;
+}
+#window_min{
+    width: 50px;
+}
+#window_year{
+    width: 50px;
+}
+#monthName{
+   font-family: "Arial Black", "Arial Bold", Gadget, sans-serif;
+}
+#stuffabovecalendar{
+    text-align: center;
+}
+#neweventstuff{
+    text-align: center;
+}

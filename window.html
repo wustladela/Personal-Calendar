@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Edit Event</title>
+        <link rel="stylesheet" type="text/css" href="stylesheet.css"/>
+        <meta charset="utf-8"/>
+    </head>
+    
+    <body>
+        <p id="test">
+            
+        </p>
+        Title: <input type="text" name="window_title" id="window_title"/>
+        Content: <input type="text" name="window_content" id="window_content"/>
+        Date:  <input type="text" name="window_month" id="window_month" size="3"/>
+        <input type="number" name="window_day" id="window_day" min="1" max="31"/>
+        <input type="number" name="window_year" id="window_year" min="2013" max="2015"/>
+        <br>
+        
+        Time:  <input type="number" name="window_hour" id="window_hour" min="1" max="12"/>
+        : <input type="number" name="window_min" id="window_min" min="0" max="59"/>
+       <br>
+        AM<input type="radio" name="window_am_pm" id="window_am" value="am"/>
+        PM<input type="radio" name="window_am_pm" id="window_pm" value="am"/>
+        <br>
+        Category:<input type="text" name="window_category" id="window_category"/>
+        <br>To remove category, change category to none.
+        <br>
+        <input type="submit" name="savechanges" id="savechanges" value="Save Changes"/>
+        <script type="text/javascript">
+            function loaded() {
+                window.opener.generateContent();
+            }
+            document.addEventListener("DOMContentLoaded", loaded, false);
+            document.getElementById("savechanges").addEventListener("click",window.opener.editEvent, false);
+        </script>
+    </body>
+</html>

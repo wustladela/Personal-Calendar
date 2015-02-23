@@ -1,0 +1,892 @@
+<!-- Authors: Amanda Whalen, Adela Gao
+Class Project: cse330 module 8
+July, 2014 -->
+<!DOCTYPE html>
+<html>
+   <head>
+      <meta charset="utf-8">
+      <title>Module 6 Group</title>
+      <link rel="stylesheet" type="text/css" href="stylesheet.css"/>
+      <link href="favicon.ico" rel="icon" type="image/x-icon" />
+   </head>
+   <body>
+      
+        <h1>
+            Our Calendar Site
+        </h1>
+      
+        <h2 id="amiloggedin">
+            Login:
+        </h2>
+   
+        <p class="form" id="form">
+            Username:  <input type="text" name="username" id="user" value="" required />
+            Password:  <input type="password" name="password" id="pw" value="" required />
+            <input type="submit" name="submitbutton" id="btn" value="Submit"/>
+        </p>
+   
+        <h2 id="register_text">
+            Register:
+        </h2>
+
+        <p class="form" id="form2">
+            Username:  <input type="text" name="new_username" id="new_user" value="" required />
+            Password:  <input type="password" name="new_password" id="new_pw" value="" required />
+            <input type="submit" name="registerbutton" id="reg_btn" value="Register"/>
+        </p>
+
+        <br>
+            
+        <div id="stuffabovecalendar">
+            Current date:  <div id="firstday">info</div>
+            Existing events:    <div class="Events" id="existingEvents"></div>
+            <input type="submit" name="oldEventButton" id="oldEventButton" value="Existing events"/>
+            <input type="submit" id="toggleCat" name="toggleCat" value="Toggle Categories"/>
+            <input name="submit" id="prev_month" type=button value="Previous month">
+            <input name="submit" id="next_month" type=button value="Next month">
+            <input name="submit" id="shareTo" type=button value="Share calendar with">
+            <input name="submit" id="shareFrom" type=button value="Open shared calendar">
+            <input name="submit" id="mine" type=button value="View My Calendar">
+            <h1 id="monthName">Month:</h1>
+        </div>
+        <table class="calendar" id="calendar">
+            <tr><th>Sunday</th><th>Monday</th><th>Tuesday</th><th>Wednesday</th><th>Thursday</th><th>Friday</th><th>Saturday</th></tr>
+            <tr><td id="1"> </td><td id="2"> </td><td id="3"> </td><td id="4"> </td><td id="5"> </td><td id="6"> </td><td id="7"> </td></tr>
+            <tr><td id="8"> </td><td id="9"> </td><td id="10"> </td><td id="11"> </td><td id="12"> </td><td id="13"> </td><td id="14"> </td></tr>
+            <tr><td id="15"> </td><td id="16"> </td><td id="17"> </td><td id="18"> </td><td id="19"> </td><td id="20"> </td><td id="21"> </td></tr>
+            <tr><td id="22"> </td><td id="23"> </td><td id="24"> </td><td id="25"> </td><td id="26"> </td><td id="27"> </td><td id="28"> </td></tr>
+            <tr><td id="29"> </td><td id="30"> </td><td id="31"> </td><td id="32"> </td><td id="33"> </td><td id="34"> </td><td id="35"> </td></tr>
+            <tr id='newline'><td id='36'> </td><td id='37'> </td><td id='38'> </td><td id='39'> </td><td id='40'> </td><td id='41'> </td><td id='42'> </td></tr>
+        </table>
+
+        <div id="neweventstuff">
+            Event title:<input name="title" type="text" value="" id="title">
+            <br>
+            Event content(optional):<input name="content" type="text" value="" id="content">
+            <br>
+            Event date:<input name="event_month" id="event_month" type="text" value="" placeholder="Month Name"/>
+            <input name="event_day" id="event_day" type="number" value="" placeholder="Day" min="1" max="31"/>
+            <input name="event_year" id="event_year" type="number" value="" placeholder="Year" min="2013" max="2015"/>
+            <br>
+            Event time:<input name="event_hour" id="event_hour" type="number" value="" placeholder="Hour" min="1" max="12"/>
+            : <input name="event_min" id="event_min" type="number" value="" placeholder="Min" min="0" max="59"/>
+            AM<input type="radio" name="ampm" id="AM" value="am" checked/>
+            PM<input type="radio" name="ampm" id="PM" value="pm"/>
+            <br>
+            Category(optional): <input type="text" name="category" id="category" value="" />
+            Share with user(s): <input type="text" name="event_shared_users" id="event_shared_users" value=""/>
+            <br><input type="submit" name="newEventButton" id="newEventButton" value="Create New Event"/>
+        </div>
+        
+        <script type="text/javascript">
+
+            document.addEventListener("DOMContentLoaded", testDate, false);
+            document.addEventListener("DOMContentLoaded", currentlyLoggedin, false);
+            document.getElementById("btn").addEventListener("click", checkLogin, false);
+            document.getElementById("reg_btn").addEventListener("click", register, false);
+            document.getElementById("newEventButton").addEventListener("click", newEvent, false);
+            document.getElementById("oldEventButton").addEventListener("click", displayAll, false);
+            document.getElementById("toggleCat").addEventListener("click", toggleCategories, false);
+            document.getElementById("shareTo").addEventListener("click", shareCalendarTo, false);
+            document.getElementById("shareFrom").addEventListener("click", shareCalendarFrom, false);
+            document.getElementById("mine").addEventListener("click", displayAll, false);
+           
+            var editTitle=[]; 
+            editTitle.length=50;
+            var editContent=[];
+            editContent.length=50;  
+            var event_id=[];
+            event_id.length=50;
+            var popIndex;
+            var newTitle;
+            var newContent;   
+            var thisEventId;
+            var token;
+            var userid;
+            var catDisplay = true;
+            var window_event_name;
+            var window_event_descrip;
+            var window_event_id;
+            var window_event_month;
+            var window_event_day;
+            var window_event_year;
+            var window_event_hour;
+            var window_event_min;
+            var window_event_id;
+            var window_am_or_pm;
+            var window_event_category;
+            var group_event_ppl;
+            var own_cal = true;
+            
+            function shareCalendarTo() {
+                var shareToUser = prompt("Enter the username to share your calendar");
+                var eventData = "shareToUser="+encodeURIComponent(shareToUser);
+                var saveNewEvent = new XMLHttpRequest();
+                saveNewEvent.open("POST", "addSharedUser.php", true);
+                saveNewEvent.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+                saveNewEvent.addEventListener("load", shareCalendarToCallback, false);
+                saveNewEvent.send(eventData);
+            }   
+            function shareCalendarToCallback(event) {
+                //alert("reached shareCalendarToCallback");
+                var json_displayEventResponse = JSON.parse(event.target.responseText);
+                if (json_displayEventResponse.status == "failure") {
+                    alert ("status = failure");
+                }
+                if (json_displayEventResponse.status == "success") {
+                    alert ("shared successfully");
+                }
+            }
+            function shareCalendarFrom() {
+                var shareFromUser = prompt("Enter the username to view shared calendar from that user");
+                if (shareFromUser) {
+                    var eventData = "shareFromUser="+encodeURIComponent(shareFromUser);  
+                    var saveNewEvent = new XMLHttpRequest();
+                    saveNewEvent.open("POST", "displayShared.php", true);
+                    saveNewEvent.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+                    saveNewEvent.addEventListener("load", shareCalendarFromCallback, false);
+                    saveNewEvent.send(eventData);
+                }
+            }
+            function shareCalendarFromCallback(event){
+                own_cal = false;
+                var json_displayEventResponse = JSON.parse(event.target.responseText);
+                if (json_displayEventResponse.status == "notloggedin") {
+                    document.getElementById("existingEvents").textContent="";
+                    var weeks = currentMonth.getWeeks();
+                    var week_info = [];
+                    var i=0;
+                    for(var w in weeks){
+                        var days_in_weeks = weeks[w].getDates();
+                        for(var x=0;x<days_in_weeks.length;x++){ 
+                            week_info[i] = days_in_weeks[x];
+                            i++;
+                        }
+                    }
+                    for(var n=0;n<week_info.length;n++){
+                        document.getElementById(n+1).innerHTML = week_info[n].getDate();
+                    } 
+                }
+                if (json_displayEventResponse.status == "failure") {
+                    alert ("status = failure");
+                }
+
+                if (json_displayEventResponse.status == "success") {
+                    document.getElementById("existingEvents").textContent="";
+                    var weeks = currentMonth.getWeeks();
+                    //alert(weeks);
+                    var week_info = [];
+                    var i=0;
+                    for(var w in weeks){
+                        var days_in_weeks = weeks[w].getDates();
+                        for(var x=0;x<days_in_weeks.length;x++){ 
+                            week_info[i] = days_in_weeks[x];
+                            i++;
+                        }
+                    }
+                    for(var n=0;n<week_info.length;n++){
+                        document.getElementById(n+1).innerHTML = week_info[n].getDate();
+                    }
+                    for (var i =0; i<json_displayEventResponse.title.length; i++) {
+                        document.getElementById("existingEvents").textContent+=(json_displayEventResponse.title[i]+ " " + json_displayEventResponse.day[i]+"  ");//display event titles
+                        var dayIndex = json_displayEventResponse.day[i];
+                        editTitle[dayIndex]=json_displayEventResponse.title[i];
+                        editContent[dayIndex]=json_displayEventResponse.content[i];
+                        event_id[dayIndex]=json_displayEventResponse.event_id[i];
+                        var mins=json_displayEventResponse.min[i];
+                        if (json_displayEventResponse.min[i]==0) {
+                            mins = "00";
+                        }
+                        if ((json_displayEventResponse.min[i]<10)&&(json_displayEventResponse.min[i]!=0)) {
+                            mins = "0"+json_displayEventResponse.min[i];
+                        }
+                        for(var n=0;n<week_info.length;n++){
+                            if ((json_displayEventResponse.day[i]==week_info[n].getDate())&&(json_displayEventResponse.month[i]==week_info[n].getMonthName())) {
+                    
+                                document.getElementById(n+1).innerHTML+="<br>" + json_displayEventResponse.title[i] + "  " + json_displayEventResponse.hour[i]+":"+mins+" "+json_displayEventResponse.am_or_pm[i]+"<div id=categoryDisplay"+json_displayEventResponse.event_id[i]+" > category: "+json_displayEventResponse.category[i]+"</div>";
+                                if ((json_displayEventResponse.category[i]!="")&&(json_displayEventResponse.category[i]!=null)) {
+                                    if (catDisplay==true) {
+                                        document.getElementById("categoryDisplay"+json_displayEventResponse.event_id[i]).style.display="";
+                                    }
+                                    if (catDisplay==false) {
+                                        document.getElementById("categoryDisplay"+json_displayEventResponse.event_id[i]).style.display="none";
+                                    }
+                                }
+                                if ((json_displayEventResponse.category[i]=="")||(json_displayEventResponse.category[i]==null)) {
+                                    //alert("reached");
+                                    if(document.getElementById("categoryDisplay"+json_displayEventResponse.event_id[i])!=null){
+                                        document.getElementById("categoryDisplay"+json_displayEventResponse.event_id[i]).style.display="none";
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                }else{
+                    alert("displayShared failed!");
+                }
+            }
+
+            function openpop(event_name, event_descrip) { 
+                OpenWindow=window.open("window.html", "newwin", "height=250, width=250");
+            }
+            function generateContent(event_name, event_descrip){
+                OpenWindow.document.getElementById("window_title").placeholder=window_event_name;
+                OpenWindow.document.getElementById("window_content").placeholder=window_event_descrip;
+                OpenWindow.document.getElementById("window_month").placeholder=window_event_month;
+                OpenWindow.document.getElementById("window_day").placeholder=window_event_day;
+                OpenWindow.document.getElementById("window_year").placeholder=window_event_year;
+                OpenWindow.document.getElementById("window_hour").placeholder=window_event_hour;
+                OpenWindow.document.getElementById("window_min").placeholder=window_event_min;
+
+                OpenWindow.document.getElementById("window_category").placeholder=window_event_category;
+                if (window_event_category==null) {
+                    //alert("reached");
+                    OpenWindow.document.getElementById("window_category").placeholder="none";
+                }
+                if (window_am_or_pm=="AM") {
+                    OpenWindow.document.getElementById("window_am").checked = true;
+                }
+                if (window_am_or_pm=="PM") {
+                    OpenWindow.document.getElementById("window_pm").checked = true;
+                }
+            }
+function generateContentCallback(event){
+   var json_response = JSON.parse(event.target.responseText);
+   //OpenWindow.document.getElementById("test").innerHTML="success";
+   OpenWindow.document.getElementById("window_title").value=json_response.title; 
+}
+          
+            function testDate() {
+                var currentDate = new Date();
+                var currentMonth = new Month(currentDate.getFullYear(), currentDate.getMonth());
+                var currentWeek = currentMonth.getWeeks();
+                var currentDay = currentWeek[0].getDates()[0];
+                //alert(currentDate);
+                document.getElementById("firstday").textContent=currentDate;
+            }
+            function checkInput(eventTitle, eventContent, event_month, event_day, event_year, event_hour, event_min, event_category, event_users){
+                var pattern = new RegExp(/[~`!#$%\^&*+=\-\[\]\\';,/{}|\\:<>\?]/);
+                if (pattern.test(eventTitle)) {
+                    alert("Please only use standard alphanumerics in your title");
+                    return false;
+                }
+                if (eventTitle=="") {
+                    alert("Please enter a title");
+                    return false;
+                }
+                if (pattern.test(eventContent)) {
+                    alert("Please only use standard alphanumerics in your event content");
+                    return false;
+                }
+                
+                if ((event_month!="January")&&(event_month!="February")&&(event_month!="March")&&(event_month!="April")&&(event_month!="May")&&(event_month!="June")
+                    &&(event_month!="July")&&(event_month!="August")&&(event_month!="September")&&(event_month!="October")&&(event_month!="November")&&(event_month!="December")) {
+                    alert("Please enter a valid month name");
+                    return false;
+                }
+                if ((event_month=="January")||(event_month=="March")||(event_month=="May")||(event_month=="July")||(event_month=="August")||(event_month=="October")||(event_month=="December")) {
+                    if ((event_day<=0)||(event_day>=31)) {
+                        
+                      alert("Please enter a valid day for the selected month");
+                        return false;  
+                    }
+                    
+                }
+                if ((event_month=="April")||(event_month=="June")||(event_month=="September")||(event_month=="November")) {
+                    if ((event_day<=0)||(event_day>=30)) {
+                         alert("Please enter a valid day for the selected month");
+                        return false;
+                    }
+                   
+                }
+                if (event_month=="February") {
+                    if (event_day>28) {
+                        alert("Please enter a valid day for the selected month");
+                        return false;
+                    }
+                }
+                if ((event_year>2015)||(event_year<2013)) {
+                    alert("Please enter a valid year");
+                    return false;
+                }
+                if ((event_hour<1)||(event_hour>12)) {
+                    alert("Please enter a valid hour");
+                    return false;
+                }
+                if ((event_min<0)||(event_min>59)) {
+                    alert("Please enter valid minutes");
+                    return false;
+                }
+                if (pattern.test(event_category)) {
+                    alert("Please only use standard alphanumerics in your category");
+                    return false;
+                }
+                if (pattern.test(event_users)) {
+                    alert("Please only use standard alphanumerics in your users list");
+                    return false;
+                }
+               
+                return true;
+            }
+            function newEvent(){
+                var eventTitle = document.getElementById("title").value;
+                var eventContent = document.getElementById("content").value;
+                var event_month = document.getElementById("event_month").value;
+                var event_day = document.getElementById("event_day").value;
+                var event_year = document.getElementById("event_year").value;
+                var event_hour = document.getElementById("event_hour").value;
+                var event_min = document.getElementById("event_min").value;
+                var event_category = document.getElementById("category").value;
+                var event_users = document.getElementById("event_shared_users").value;
+                group_event_ppl = event_users;
+                var am_or_pm = document.getElementsByName("ampm");
+                var which = null;
+                for(var i=0;i<am_or_pm.length;i++){
+                    if (am_or_pm[i].checked) {
+                        which = am_or_pm[i].id;
+                      
+                    }   
+                }
+                if(checkInput(eventTitle, eventContent, event_month, event_day, event_year, event_hour, event_min, event_category, event_users)){
+                     
+                    var eventData = "title="+encodeURIComponent(eventTitle)+"&content="+encodeURIComponent(eventContent)+
+                        "&event_month="+encodeURIComponent(event_month)+"&event_day="+encodeURIComponent(event_day)+"&event_year="+
+                        encodeURIComponent(event_year)+"&event_hour="+encodeURIComponent(event_hour)+"&event_min="+encodeURIComponent(event_min)+"&am_or_pm="+encodeURIComponent(which)+"&category="+encodeURIComponent(event_category)+"&token="+encodeURIComponent(token)+"&event_users="+encodeURIComponent(event_users);
+                    var saveNewEvent = new XMLHttpRequest();
+                    saveNewEvent.open("POST", "new_event.php", true);
+                    saveNewEvent.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+                    saveNewEvent.addEventListener("load", newEventCallback, false);
+                    saveNewEvent.send(eventData);
+                }else{
+                    document.getElementById("title").value = "";
+                    document.getElementById("content").value = "";
+                    document.getElementById("event_month").value = "";
+                    document.getElementById("event_day").value = "";
+                    document.getElementById("event_year").value = "";
+                    document.getElementById("event_hour").value = "";
+                    document.getElementById("event_min").value = "";
+                }
+               
+            }
+            
+            function newEventCallback(event){
+                var json_newEventResponse = JSON.parse(event.target.responseText);
+                if (json_newEventResponse.status == "success") {
+                    alert("new event created!");
+                    displayAll();
+                    document.getElementById("title").value="";
+                    document.getElementById("content").value="";
+                    document.getElementById("event_month").value="";
+                    document.getElementById("event_day").value="";
+                    document.getElementById("event_year").value="";
+                    document.getElementById("event_hour").value="";
+                    document.getElementById("event_min").value="";
+                    document.getElementById("category").value="";  
+                }
+                if (json_newEventResponse.status=="notloggedin") {
+                    alert("You must be logged in to create an event.");
+                }
+            }
+            function toggleCategories(event){
+                catDisplay = !catDisplay;
+                //alert(catDisplay);
+                if (catDisplay==false) {
+                    alert("Category display turned off");
+                }
+                if (catDisplay==true) {
+                    alert("Category display turned on");
+                }
+                displayAll();  
+            }
+         
+            function displayAll(){
+                var saveNewEvent = new XMLHttpRequest();
+                saveNewEvent.open("POST", "displayEvents.php", true);
+                saveNewEvent.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+                saveNewEvent.addEventListener("load", displayCallback, false);
+                eventData = "token="+encodeURIComponent(token);
+                saveNewEvent.send(eventData);
+            }
+            
+            function displayCallback(event){
+                var json_displayEventResponse = JSON.parse(event.target.responseText);
+                if (json_displayEventResponse.status =="noevents") {
+                    document.getElementById("existingEvents").textContent = "There are no events."
+                }
+                if (json_displayEventResponse.status == "notloggedin") {
+                    document.getElementById("existingEvents").textContent="";
+                    var weeks = currentMonth.getWeeks();
+                    var week_info = [];
+                    var i=0;
+                    for(var w in weeks){
+                        var days_in_weeks = weeks[w].getDates();
+                        for(var x=0;x<days_in_weeks.length;x++){ 
+                            week_info[i] = days_in_weeks[x];
+                            i++;
+                        }
+                    }
+                    for(var n=0;n<week_info.length;n++){
+                        document.getElementById(n+1).innerHTML = week_info[n].getDate();
+                    } 
+                }
+                if (json_displayEventResponse.status == "success") {
+                    document.getElementById("existingEvents").textContent="";
+                    var weeks = currentMonth.getWeeks();
+                    var week_info = [];
+                    var i=0;
+                    for(var w in weeks){
+                        var days_in_weeks = weeks[w].getDates();
+                        for(var x=0;x<days_in_weeks.length;x++){ 
+                            week_info[i] = days_in_weeks[x];
+                            i++;
+                        }
+                    }
+                    for(var n=0;n<week_info.length;n++){
+                        document.getElementById(n+1).innerHTML = week_info[n].getDate();
+                    }
+                    for (var i =0; i<json_displayEventResponse.title.length; i++) {
+                        document.getElementById("existingEvents").textContent+=(json_displayEventResponse.title[i]+ ": " + json_displayEventResponse.month[i]+" "+json_displayEventResponse.day[i]+"  ");//display event titles
+                        var dayIndex = json_displayEventResponse.day[i];
+                        editTitle[dayIndex]=json_displayEventResponse.title[i];
+                        editContent[dayIndex]=json_displayEventResponse.content[i];
+                        event_id[dayIndex]=json_displayEventResponse.event_id[i];
+                        var mins=json_displayEventResponse.min[i];
+                        if (json_displayEventResponse.min[i]==0) {
+                            mins = "00";
+                        }
+                        if ((json_displayEventResponse.min[i]<10)&&(json_displayEventResponse.min[i]!=0)) {
+                            mins = "0"+json_displayEventResponse.min[i];
+                        }
+                        for(var n=0;n<week_info.length;n++){
+                            if ((json_displayEventResponse.day[i]==week_info[n].getDate())&&(json_displayEventResponse.month[i]==week_info[n].getMonthName())&&(json_displayEventResponse.year[i]==week_info[n].getFullYear())) {
+                                document.getElementById(n+1).innerHTML+="<br>" + json_displayEventResponse.title[i] + "  " + json_displayEventResponse.hour[i]+":"+mins+" "+json_displayEventResponse.am_or_pm[i]+"<div id=categoryDisplay"+json_displayEventResponse.event_id[i]+" > category: "+json_displayEventResponse.category[i]+"</div>";
+                                if ((json_displayEventResponse.category[i]!="")&&(json_displayEventResponse.category[i]!=null)) {
+                                    if (catDisplay==true) {
+                                        document.getElementById("categoryDisplay"+json_displayEventResponse.event_id[i]).style.display="";
+                                    }
+                                    if (catDisplay==false) {
+                                        document.getElementById("categoryDisplay"+json_displayEventResponse.event_id[i]).style.display="none";
+                                    }  
+                                }
+                                if ((json_displayEventResponse.category[i]=="")||(json_displayEventResponse.category[i]==null)) {
+                                    if(document.getElementById("categoryDisplay"+json_displayEventResponse.event_id[i])!=null){
+                                        document.getElementById("categoryDisplay"+json_displayEventResponse.event_id[i]).style.display="none";
+                                    }           
+                                }
+                                document.getElementById(n+1).innerHTML+="<input type='submit' name='editbtn' id=editbtn"+json_displayEventResponse.event_id[i]+" value='Edit'/><input type='submit' name='deletebtn' id=deletebtn"+json_displayEventResponse.event_id[i]+" value='Delete'/>";
+                            }
+                        }
+                    }
+                    for(var i=0;i<json_displayEventResponse.event_id.length;i++){
+                        if (document.getElementById("editbtn"+json_displayEventResponse.event_id[i])!=null) {
+                            document.getElementById("editbtn"+json_displayEventResponse.event_id[i]).addEventListener("click", editEventButton, false);
+                            document.getElementById("deletebtn"+json_displayEventResponse.event_id[i]).addEventListener("click", deleteEvent, false);
+                        }
+                    } 
+                }else{
+              // alert(json_displayEventResponse.status);
+                }
+            }
+         
+            function editEventButton(){
+         editEventId = this.id.substring('editbtn'.length);
+      
+         var eventData = "event_id="+encodeURIComponent(editEventId)+"&token="+encodeURIComponent(token);
+         //alert(editEventId);
+         xmlHttp = new XMLHttpRequest();
+         xmlHttp.open("POST", "editEventBtn.php", true);
+         xmlHttp.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+         xmlHttp.addEventListener("load", editEventButtonCallback, false);
+         xmlHttp.send(eventData);
+         }
+         function editEventButtonCallback(event){
+            var json_response = JSON.parse(event.target.responseText);
+            //alert(json_response.event_name+"  "+json_response.event_descrip);
+            window_event_name = json_response.event_name;
+            window_event_descrip = json_response.event_descrip;
+            window_event_month = json_response.event_month;
+            window_event_day = json_response.event_day;
+            window_event_year = json_response.event_year;
+            window_event_hour = json_response.event_hour;
+            window_event_min = json_response.event_min;
+            window_event_category = json_response.category;
+             if (window_event_min==0) {
+                    window_event_min = "00";
+                  }
+                  if ((window_event_min<10)&&(window_event_min!=0)) {
+                    window_event_min = "0"+window_event_min;
+                  }
+            window_event_id = json_response.event_id;
+            window_am_or_pm = json_response.am_or_pm;
+            openpop(window_event_name, window_event_descrip);
+            
+         }
+          function editEvent(){
+            //alert("to create new Event");
+            var eventTitle = OpenWindow.document.getElementById("window_title").value;
+            //alert(eventTitle);
+            var eventContent = OpenWindow.document.getElementById("window_content").value;
+            var eventId = window_event_id;
+            var eventDay = OpenWindow.document.getElementById("window_day").value;
+            var eventHour = OpenWindow.document.getElementById("window_hour").value;
+            var eventMin = OpenWindow.document.getElementById("window_min").value;
+            var am_or_pm = OpenWindow.document.getElementsByName("window_am_pm");
+            var category = OpenWindow.document.getElementById("window_category").value;
+            var eventYear = OpenWindow.document.getElementById("window_year").value;
+            var eventMonth = OpenWindow.document.getElementById("window_month").value;
+            //var eventusers = "user1";
+                var which = null;
+                for(var i=0;i<am_or_pm.length;i++){
+                    if (am_or_pm[i].checked) {
+                        which = am_or_pm[i].id;
+                    }   
+                }
+                if (which=="window_am") {
+                    which="AM";
+                }
+                if (which=="window_pm") {
+                    which="PM";
+                }
+                 
+            var eventData = "title="+encodeURIComponent(eventTitle)+"&content="+encodeURIComponent(eventContent)+"&event_id="+encodeURIComponent(eventId)+"&day="+encodeURIComponent(eventDay)+"&hour="+encodeURIComponent(eventHour)+"&min="+encodeURIComponent(eventMin)+"&am_or_pm="+encodeURIComponent(which)+"&category="+encodeURIComponent(category)+"&token="+encodeURIComponent(token)+"&year="+encodeURIComponent(eventYear)+"&month="+encodeURIComponent(eventMonth);
+            var saveNewEvent = new XMLHttpRequest();
+            saveNewEvent.open("POST", "editEvent.php", true);
+            saveNewEvent.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+            saveNewEvent.addEventListener("load", editEventCallback, false);
+            saveNewEvent.send(eventData);
+            OpenWindow.document.close();
+            //alert("finished newEvent method");
+            
+                 
+            //alert("finished newEvent method");
+            }
+            
+         function editEventCallback(event){
+            //alert("start newEventCallback method");
+            var json_newEventResponse = JSON.parse(event.target.responseText);
+            if (json_newEventResponse.status == "success") {
+               alert("event edited!");
+               OpenWindow.close();
+               displayAll();
+            }else{
+               alert("fail to edit event");
+            }
+         }
+
+            function deleteEvent() {
+                deleteEventId = this.id.substring('deletebtn'.length);
+                var eventData = "event_id="+encodeURIComponent(deleteEventId)+"&token="+encodeURIComponent(token);
+                xmlHttp = new XMLHttpRequest();
+                xmlHttp.open("POST", "deleteEvent.php", true);
+                xmlHttp.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+                xmlHttp.addEventListener("load", deleteCallback, false);
+                xmlHttp.send(eventData);
+            }
+            
+            function deleteCallback(event){
+                var json_response = JSON.parse(event.target.responseText);
+                if (json_response.status=="success") {
+                    alert("event deleted successfully");
+                    displayAll();
+                }
+                if (json_response.status=="notloggedin") {
+                    alert("You must be logged in to delete an event.");
+                }
+                if (json_response.status=="wronguser") {
+                    alert("You did not create this event and therefore are not authorized to delete it.");
+                }
+            }
+         
+            function checkLogin(){
+                var username = document.getElementById("user").value;
+                var password = document.getElementById("pw").value;
+                var datastring = "username="+encodeURIComponent(username)+"&password="+encodeURIComponent(password);
+                var xmlHttp = new XMLHttpRequest();
+                xmlHttp.open("POST", "check_login.php", true);
+                xmlHttp.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+                xmlHttp.addEventListener("load", loginCallback, false);
+                xmlHttp.send(datastring);
+            }
+            
+            function loginCallback(event){
+                var json_response = JSON.parse(event.target.responseText);
+                if (json_response.status == "success") {
+                    alert("Login success");
+                    token = json_response.token;
+                    document.getElementById("amiloggedin").innerHTML = "You are logged in as " + json_response.username + "." +
+                        "<br><input type='submit' name='logoutbtn' id='logoutbtn' value='Logout'/>";
+                    document.getElementById("logoutbtn").addEventListener("click", logout, false);
+                    document.getElementById("form").style.display="none";
+                    document.getElementById("form2").style.display="none";
+                    document.getElementById("register_text").innerHTML = " ";
+                    displayAll();
+                }else{
+                    alert("Login failure");
+                }
+            }
+        
+            function logout(){
+                var xmlHttp = new XMLHttpRequest();
+                xmlHttp.open("POST", "logout.php", true);
+                xmlHttp.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+                xmlHttp.addEventListener("load", logoutCallback, false);
+                eventData = "token="+encodeURIComponent(token);
+                xmlHttp.send(eventData);
+            }
+            function logoutCallback(event){
+                var json_response = JSON.parse(event.target.responseText);
+                if (json_response.status == "success") {
+                    document.getElementById("amiloggedin").innerHTML = "You have been logged out successfully."+
+                        "<br>Login:";
+                    document.getElementById("form").style.display="";
+                    document.getElementById("form2").style.display="";
+                    document.getElementById("user").value="";
+                    document.getElementById("pw").value="";
+                    document.getElementById("register_text").innerHTML="Register:";
+                    displayAll();
+                }else{
+                    alert(json_response.status);
+                    document.getElementById("amiloggedin").innerHTML = "Logout failed.<br>Login:";
+                    document.getElementById("register_text").innerHTML = "Register:";
+                }
+            }
+            function register(){
+                var new_username = document.getElementById("new_user").value;
+                var new_password = document.getElementById("new_pw").value;
+                var datastring = "new_username="+encodeURIComponent(new_username)+"&new_password="+encodeURIComponent(new_password);
+                var xmlHttp = new XMLHttpRequest();
+                xmlHttp.open("POST", "register.php", true);
+                xmlHttp.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+                xmlHttp.addEventListener("load", registerCallback, false);
+                xmlHttp.send(datastring);
+            }
+      
+            function registerCallback(event){
+                var json_response = JSON.parse(event.target.responseText);
+                if (json_response.status=="success") {
+                    alert("Registration success.  Please log in.");
+                    document.getElementById("new_user").value="";
+                    document.getElementById("new_pw").value="";
+                }else{
+                    alert("Registration failure");
+                }
+            }
+            function currentlyLoggedin(){
+                var xmlHttp = new XMLHttpRequest();
+                xmlHttp.open("POST", "currently_logged_in.php", true);
+                xmlHttp.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+                xmlHttp.addEventListener("load", currentlyLoggedinCallback, false);
+                xmlHttp.send(null);
+            }
+            function currentlyLoggedinCallback(event){
+                var json_response = JSON.parse(event.target.responseText);
+                if (json_response.status=="success") {
+                    document.getElementById("amiloggedin").innerHTML = "You are logged in as " + json_response.username + "." +
+                        "<br><input type='submit' name='logoutbtn' id='logoutbtn' value='Logout'/>";
+                    document.getElementById("logoutbtn").addEventListener("click", logout, false);
+                    document.getElementById("form").style.display="none";
+                    document.getElementById("form2").style.display="none";
+                    document.getElementById("register_text").innerHTML = " ";
+                    token=json_response.token;
+                    //alert(json_response.username);
+                    displayAll();
+                }
+            }
+            
+            (function () {
+                "use strict";
+                Date.prototype.deltaDays = function (n) {
+                    return new Date(this.getFullYear(), this.getMonth(), this.getDate() + n);
+                };
+
+                Date.prototype.getSunday = function () {
+                    return this.deltaDays(-1 * this.getDay());
+                };
+            }());
+
+            function Week(initial_d) {
+                "use strict";
+                this.sunday = initial_d.getSunday();
+                this.nextWeek = function () {
+                    return new Week(this.sunday.deltaDays(7));
+                };
+                this.prevWeek = function () {
+                    return new Week(this.sunday.deltaDays(-7));
+                };
+                this.contains = function (d) {
+                    return (this.sunday.valueOf() === d.getSunday().valueOf());
+                };
+                this.getDates = function () {
+                    var dates = [];
+                    for(var i=0; i<7; i++){
+                        dates.push(this.sunday.deltaDays(i));
+                    }
+                    return dates;
+                };
+            }
+
+            function Month(year, month) {
+                "use strict";
+                this.year = year;
+                this.month = month;
+                this.nextMonth = function () {
+                    return new Month( year + Math.floor((month+1)/12), (month+1) % 12);
+                };
+                this.prevMonth = function () {
+                    return new Month( year + Math.floor((month-1)/12), (month+11) % 12);
+                };
+                this.getDateObject = function(d) {
+                    return new Date(this.year, this.month, d);
+                };
+                this.getWeeks = function () {
+                    var firstDay = this.getDateObject(1);
+                    var lastDay = this.nextMonth().getDateObject(0);
+                    var weeks = [];
+                    var currweek = new Week(firstDay);
+                    weeks.push(currweek);
+                    while(!currweek.contains(lastDay)){
+                        currweek = currweek.nextWeek();
+                        weeks.push(currweek);
+                    }
+                    return weeks;
+                };
+            }
+            Date.prototype.monthNames = [
+                "January", "February", "March",
+                "April", "May", "June",
+                "July", "August", "September",
+                "October", "November", "December"
+            ];
+
+            Date.prototype.getMonthName = function() {
+                return this.monthNames[this.getMonth()];
+            };
+
+            var currentDate = new Date();
+            var currentMonth = new Month(currentDate.getFullYear(), currentDate.getMonth()); // July 2014
+ 
+            document.getElementById("next_month").addEventListener("click", function(event){
+                currentMonth = currentMonth.nextMonth(); 
+                updateCalendar(); 
+                displayAll();
+            }, false);
+ 
+            document.getElementById("prev_month").addEventListener("click", function(event){
+                currentMonth = currentMonth.prevMonth(); // Previous month would be currentMonth.prevMonth()
+                updateCalendar(); // Whenever the month is updated, we'll need to re-render the calendar in HTML
+                displayAll();
+            }, false);
+
+            function updateCalendar(){
+                var weeks = currentMonth.getWeeks();
+                var currentMonthName;
+                var currentYear = currentMonth.getDateObject(1).getFullYear();
+                if (currentMonth.month==0) {
+                    currentMonthName = "January";
+                }
+                if (currentMonth.month==1) {
+                    currentMonthName = "February";
+                }
+                if (currentMonth.month==2) {
+                    currentMonthName = "March";
+                }
+                if (currentMonth.month==3) {
+                    currentMonthName = "April";
+                }
+                if (currentMonth.month==4) {
+                    currentMonthName = "May";
+                }
+                if (currentMonth.month==5) {
+                    currentMonthName = "June";
+                }
+                if (currentMonth.month==6) {
+                    currentMonthName="July";
+                }
+                if (currentMonth.month==7) {
+                    currentMonthName = "August";
+                }
+                if (currentMonth.month==8) {
+                    currentMonthName = "September";
+                }
+                if (currentMonth.month==9) {
+                    currentMonthName = "October";
+                }
+                if (currentMonth.month==10) {
+                    currentMonthName = "November";
+                }
+                if (currentMonth.month==11) {
+                    currentMonthName = "December";
+                }
+                document.getElementById("monthName").innerHTML = currentMonthName+" " + currentYear;
+        
+                if (weeks.length==6) {
+                    document.getElementById("newline").style.display = "";
+                }
+                if (weeks.length < 6) {
+                    document.getElementById("newline").style.display = "none";
+                }
+                var i=0;
+                var week_info = [];
+                for(var w in weeks){
+                    var days = weeks[w].getDates();
+                    for(var x=0;x<days.length;x++){ 
+                        week_info[i] = days[x].getDate();
+                        i++;
+                    }
+                }
+       
+                document.getElementById("1").textContent=week_info[0];
+                document.getElementById("2").textContent=week_info[1];
+                document.getElementById("3").textContent=week_info[2];
+                document.getElementById("4").textContent=week_info[3];
+                document.getElementById("5").textContent=week_info[4];
+                document.getElementById("6").textContent=week_info[5];
+                document.getElementById("7").textContent=week_info[6];
+                document.getElementById("8").textContent=week_info[7];
+                document.getElementById("9").textContent=week_info[8];
+                document.getElementById("10").textContent=week_info[9];
+                document.getElementById("11").textContent=week_info[10];
+                document.getElementById("12").textContent=week_info[11];
+                document.getElementById("13").textContent=week_info[12];
+                document.getElementById("14").textContent=week_info[13];
+                document.getElementById("15").textContent=week_info[14];
+                document.getElementById("16").textContent=week_info[15];
+                document.getElementById("17").textContent=week_info[16];
+                document.getElementById("18").textContent=week_info[17];
+                document.getElementById("19").textContent=week_info[18];
+                document.getElementById("20").textContent=week_info[19];
+                document.getElementById("21").textContent=week_info[20];
+                document.getElementById("22").textContent=week_info[21];
+                document.getElementById("23").textContent=week_info[22];
+                document.getElementById("24").textContent=week_info[23];
+                document.getElementById("25").textContent=week_info[24];
+                document.getElementById("26").textContent=week_info[25];
+                document.getElementById("27").textContent=week_info[26];
+                document.getElementById("28").textContent=week_info[27];
+                document.getElementById("29").textContent=week_info[28];
+                document.getElementById("30").textContent=week_info[29];
+                document.getElementById("31").textContent=week_info[30];
+                document.getElementById("32").textContent=week_info[31];
+                document.getElementById("33").textContent=week_info[32];
+                document.getElementById("34").textContent=week_info[33];
+                document.getElementById("35").textContent=week_info[34];
+
+            }
+            updateCalendar();
+            Element.prototype.remove = function() {
+                this.parentElement.removeChild(this);
+            }
+            NodeList.prototype.remove = HTMLCollection.prototype.remove = function() {
+                for(var i = 0, len = this.length; i < len; i++) {
+                    if(this[i] && this[i].parentElement) {
+                        this[i].parentElement.removeChild(this[i]);
+                    }
+                }
+            }
+
+
+    </script>
+     
+    </body>
+</html>
