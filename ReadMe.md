@@ -1,5 +1,7 @@
 # Personal Calendar
 
+Main page: calendar.html
+
 Personal calendar website modeled after Google Calendar. Users can:
 
 1)   Register, log in, add friends.
